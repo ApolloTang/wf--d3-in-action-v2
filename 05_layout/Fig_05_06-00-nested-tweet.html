@@ -1,0 +1,70 @@
+<html>
+<head>
+  <title>D3 in Action Chapter 5 - Example 3</title>
+  <meta charset="utf-8" />
+<script src="d3.v3.min.js" type="text/JavaScript"></script>
+</head>
+<style>
+  svg {
+    height: 500px;
+    width: 500px;
+    border: 1px solid gray;
+  }
+
+</style>
+<body>
+
+<div id="viz">
+  <svg>
+  </svg>
+</div>
+<div id="controls" />
+</body>
+  <footer>
+
+<script>
+d3.json("tweets.json",function(error,data) {dataViz(data.tweets)});
+
+function dataViz(incData) {
+    nestedTweets = d3.nest()
+        .key(function (el) {return el.user})
+        .entries(incData);
+
+    var colorScale = d3.scale.category10([0,1,2,3]);
+
+    for (var i=0; i<10; i++){
+        console.log(1, colorScale(i));
+    }
+
+    nestedTweets.forEach(function (user) {
+        user.numTweets = user.values.length; // number of tweet this user has
+    })
+
+    pieChart = d3.layout.pie().sort(null);
+    pieChart.value(function(d) {return d.numTweets});
+
+    var pieChart_w_values = pieChart(nestedTweets);
+    console.log('pieChart_w_values : ',pieChart_w_values );
+
+    newArc = d3.svg.arc();
+    newArc.outerRadius(100)
+        .innerRadius(20);
+
+    d3.select("svg")
+        .append("g")
+        .attr("transform","translate(250,250)")
+        .selectAll("path")
+        .data(pieChart(nestedTweets), function(d) {return d.data.key})
+        .enter()
+        .append("path")
+        .attr("d", newArc)
+        .style("fill", function(d, i) { return colorScale(i) })
+        .style("opacity", .5)
+        .style("stroke", "black")
+        .style("stroke-width", "2px")
+}
+
+</script>
+  </footer>
+
+</html>
