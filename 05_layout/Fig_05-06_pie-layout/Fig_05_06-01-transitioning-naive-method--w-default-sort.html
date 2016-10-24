@@ -105,13 +105,13 @@ function dataViz(incData) {
         pieChart.value(function(d) {return d.numRetweets});
         d3.selectAll("path").data(function(d){
             nestedTweets.forEach(function(itm){
-                console.log('numFavorites: ', itm.key, itm.numFavorites);
+                console.log('numRetweets: ', itm.key, itm.numFavorites);
             });
 
             var layout = pieChart(nestedTweets);
 
             layout.forEach(function(itm){
-                console.log('numFavorites: layout ', itm.data.key, itm.value, itm)
+                console.log('numRetweets: layout ', itm.data.key, itm.value, itm)
             });
             return layout;
         }).transition().duration(1000).attr("d", newArc);
