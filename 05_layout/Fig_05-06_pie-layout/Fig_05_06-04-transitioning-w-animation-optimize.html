@@ -1,9 +1,9 @@
-
 <html>
 <head>
   <title>D3 in Action Chapter 5 - Example 3</title>
   <meta charset="utf-8" />
 <script src="d3.v3.min.js" type="text/JavaScript"></script>
+<script src="lodash.v4.16.4.min.js" type="text/JavaScript"></script>
 </head>
 <style>
   svg {
@@ -90,7 +90,7 @@ function dataViz(incData) {
             //     console.log('numTweets: ', itm.key, itm.numTweets);
             // });
 
-            var filtered = nestedTweets.filter(function(itm){return itm.numTweets > 0});
+            var filtered = nestedTweets;//.filter(function(itm){return itm.numTweets > 0});
 
             // filtered.forEach(function(itm){
             //     console.log('numTweets.filtered: ', itm.key, itm.numTweets);
@@ -119,8 +119,22 @@ function dataViz(incData) {
             .style("opacity", .5)
             .style("stroke", "black")
             .style("stroke-width", "2px")
-            .each(function(d) { this._current = d; })
-            .transition().duration(1000).attr("d", newArc);
+            .each(function(d) {
+                var d_init = _.cloneDeep(d);
+                d_init.endAngle=d_init.startAngle;
+                this._current = d_init;
+            })
+            .attr("d", function(d){
+                var d_next = _.cloneDeep(d);
+                // d_next.endAngle=d_next.startAngle;
+                var arc = newArc(d_next);
+                console.log('creative new arc before: ', d_next)
+                console.log('creative new arc: ', arc)
+                return arc;
+            })
+            // .transition().duration(1000).attr("d", newArc);
+            .transition().duration(1000).attrTween("d", arcTween);
+
         bind.transition().duration(1000).attrTween("d", arcTween);
         bind.exit().remove();
 
@@ -142,7 +156,7 @@ function dataViz(incData) {
             //     console.log('numFavorites: ', itm.key, itm.numFavorites);
             // });
 
-            var filtered = nestedTweets.filter(function(itm){return itm.numFavorites > 0});
+            var filtered = nestedTweets//.filter(function(itm){return itm.numFavorites > 0});
 
             // filtered.forEach(function(itm){
             //     console.log('numFavorites.filtered: ', itm.key, itm.numFavorites);
@@ -157,13 +171,13 @@ function dataViz(incData) {
             return layout;
         }, function(d) {
             var k = d.data.key;
-            console.log('key: ', k)
+            // console.log('key: ', k)
             return k;
         })
 
         bind.enter().append('path')
             .attr('data-key', function(d){
-                console.log('update: ', d);
+                // console.log('update: ', d);
                 return d.data.key
             })
             .style("fill", function(d, i) {return colorScale(i)})
@@ -189,7 +203,7 @@ function dataViz(incData) {
             //     console.log('numRetweets: ', itm.key, itm.numRetweets);
             // });
 
-            var filtered = nestedTweets.filter(function(itm){return itm.numRetweets > 0});
+            var filtered = nestedTweets//.filter(function(itm){return itm.numRetweets > 0});
 
             // filtered.forEach(function(itm){
             //     console.log('numRetweets.filtered: ', itm.key, itm.numRetweets);
@@ -204,13 +218,13 @@ function dataViz(incData) {
             return layout;
         }, function(d) {
             var k = d.data.key;
-            console.log('key: ', k)
+            // console.log('key: ', k)
             return k;
         })
 
         bind.enter().append('path')
             .attr('data-key', function(d){
-                console.log('update: ', d);
+                // console.log('update: ', d);
                 return d.data.key
             })
             .style("fill", function(d, i) {return colorScale(i)})
@@ -233,10 +247,25 @@ function dataViz(incData) {
 
     }
 
-    function arcTween(a) {
-        console.log(a)
-        var i = d3.interpolate(this._current, a);
+    function arcTweenReverse(a) {
+        console.log('arcTweenReverse: a: ', a);
+        console.log('arcTweenReverse:this._current: ', this._current);
+
+        // this._current.endAngle = this._current.startAngle;
+        var i = d3.interpolate(a, this._current);
         this._current = i(0);
+
+        console.log('arcTweenReverse:this._current next: ', this._current);
+        return function(t) { return newArc(i(t)); };
+    }
+
+    function arcTween(a) {
+        console.log('arcTween: arguments: ', arguments)
+        var i = d3.interpolate(this._current, a);
+
+        console.log('arcTweenReverse: prev: ', this._current);
+        this._current = i(0);
+        console.log('arcTweenReverse: next: ', this._current);
         return function(t) { return newArc(i(t)); };
     }
 }
