@@ -40,7 +40,7 @@ function dataViz(incData) {
         user.numTweets = user.values.length; // number of tweet this user has
     })
 
-    pieChart = d3.layout.pie().sort(null);
+    pieChart = d3.layout.pie();
     pieChart.value(function(d) {return d.numTweets});
 
     var pieChart_w_values = pieChart(nestedTweets);
